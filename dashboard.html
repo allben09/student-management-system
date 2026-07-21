@@ -99,4 +99,101 @@
                                         <h6 class="text-muted">Enrollments</h6>
                                         <h2 class="mb-0" id="totalEnrollments">-</h2>
                                     </div>
-                                    <div class="stat-icon">📝</
+                                    <div class="stat-icon">📝</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted">Average GPA</h6>
+                                        <h2 class="mb-0" id="avgGpa">-</h2>
+                                    </div>
+                                    <div class="stat-icon">⭐</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">Course Enrollment Distribution</div>
+                            <div class="card-body">
+                                <canvas id="enrollmentChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">Quick Actions</div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary">➕ Add New Student</button>
+                                    <button class="btn btn-success">📚 Create Course</button>
+                                    <button class="btn btn-warning">📝 Enroll Student</button>
+                                    <button class="btn btn-info">📄 Generate Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fetch dashboard stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                if (!response.ok) throw new Error('Failed to fetch stats');
+                const data = await response.json();
+                
+                document.getElementById('totalStudents').textContent = data.total_students;
+                document.getElementById('totalCourses').textContent = data.total_courses;
+                document.getElementById('totalEnrollments').textContent = data.total_enrollments;
+                document.getElementById('avgGpa').textContent = data.avg_gpa.toFixed(2);
+                
+                // Create enrollment chart
+                const ctx = document.getElementById('enrollmentChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.course_distribution.map(c => c.name),
+                        datasets: [{
+                            label: 'Enrolled Students',
+                            data: data.course_distribution.map(c => c.enrolled),
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        loadStats();
+    </script>
+</body>
+</html>
